@@ -13,6 +13,13 @@ try:
 except:
    import yaml
 
+
+__REMOTE_NAME__={
+   "jumeg_cuda":"https://gist.githubusercontent.com/pravsripad/7bb8f696999985b442d9aca8ade19f19/raw/5f88b0493a4037b880d05e95e52f1c9ce9463af8/jumeg_cuda.yml",
+   "jumeg":"https://gist.githubusercontent.com/pravsripad/0361ffee14913487eb7b7ef43c9367fe/raw/8299c6bff6386a037af046cab5483af45c037c4f/jumeg.yml",
+   "mne":"https://raw.githubusercontent.com/mne-tools/mne-python/master/environment.yml"
+   }
+
 def get_args(argv,parser=None,defaults=None,version=None):
    description="jumeg_installer start parameters"
    h_cuda=""
@@ -59,11 +66,11 @@ def load_jumeg(opt):
          dict_jumeg=yaml.load(f)
    else:
       if opt.cuda:
-         subprocess.run(["curl","--remote-name","https://gist.githubusercontent.com/pravsripad/7bb8f696999985b442d9aca8ade19f19/raw/5f88b0493a4037b880d05e95e52f1c9ce9463af8/jumeg_cuda.yml"])
+         subprocess.run(["curl","--remote-name",__REMOTE_NAME__.get("jumeg_cuda")])
          with open("jumeg_cuda.yml","r") as f:
             dict_jumeg=yaml.load(f)
       else:
-         subprocess.run(["curl","--remote-name","https://gist.githubusercontent.com/pravsripad/0361ffee14913487eb7b7ef43c9367fe/raw/8299c6bff6386a037af046cab5483af45c037c4f/jumeg.yml"])
+         subprocess.run(["curl","--remote-name",__REMOTE_NAME__.get("jumeg")])
          with open("jumeg.yml","r") as f:
             dict_jumeg=yaml.load(f)
    return dict_jumeg
@@ -74,12 +81,22 @@ def load_mne(opt):
       with open(opt.fmne,"r") as f:
          dict_mne=yaml.load(f)
    else:
-      subprocess.run(["curl","--remote-name","https://raw.githubusercontent.com/mne-tools/mne-python/master/environment.yml"])
+      subprocess.run(["curl","--remote-name",__REMOTE_NAME__.get("mne")])
       with open("environment.yml","r") as f:
          dict_mne=yaml.load(f)
    return dict_mne
 
-opt=get_args(sys.argv)
-fmne=load_mne(opt)
-print(type(fmne))
-print(fmne)
+def merge_dicts(opt,mne,jumeg):
+   env=dict()
+   for key in mne.keys():
+      env[key]=mne.get(key)
+   for key in jumeg.keys():
+      if not env.get(key):
+         env[key]=jumeg.get(key)
+   return env
+
+if __name__=="__main__":
+   opt=get_args(sys.argv)
+   mne=load_mne(opt)
+   jumeg=load_jumeg(opt)
+   merge_dicts(opt,mne,jumeg)
