@@ -8,6 +8,7 @@ Created on Thu Jun  4 07:58:13 2020
 
 import subprocess
 import sys,os,argparse,glob
+import logging
 
 import collections,pprint
 
@@ -15,6 +16,9 @@ try:
    from ruamel.yaml import YAML
 except:
    import yaml
+   
+logger = logging.getLogger('jumeg')
+logging.basicConfig(level=logging.DEBUG)
 
 
 remote_name={
@@ -143,6 +147,36 @@ def save_env(opt,env):
          fname=fname + ".yaml"
       with open(fname,"w") as f:
          yaml.dump(env,f)
+
+
+def show(opt,env):
+   """
+   shows the new generated environment file if show is true
+   
+   Parameters
+   ----------
+   opt : list of given parameters
+   env : dict with values of new environment file
+   """
+   if opt.show and env:
+      logger.info(dict2str(env))
+      
+def sort_dict(opt,env):
+   """
+   sorts env dict and returns the sorted dict if sort=true
+   
+   Parameters
+   ----------
+   opt : list of given parameters
+   env : dict with values of environment file
+   
+   Returns
+   -------
+   env : sorted dict 
+   """
+   if opt.sorted and env:
+      pass
+
 
 def merge_dicts(opt,mne,jumeg):
    env=dict()
