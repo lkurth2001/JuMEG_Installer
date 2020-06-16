@@ -27,6 +27,13 @@ remote_name={
    "mne":"https://raw.githubusercontent.com/mne-tools/mne-python/master/environment.yml"
    }
 
+def check_conda():
+   try:
+      subprocess.run(["conda","--version"],stdout=subprocess.DEVNULL)
+   except:
+      logger.info("You need to have anaconda installed")
+      sys.exit(0)
+
 def get_args(argv,parser=None,defaults=None,version=None):
    """
    function to parse the given parameters from the shell
@@ -214,6 +221,16 @@ def dict2str(d,intend=2):
     """
     pp = pprint.PrettyPrinter(indent=intend)
     return ''.join(map(str,pp.pformat(d)))     
+ 
+def run():
+   check_conda()
+   opt=get_args(sys.argv)
+   mne=load_mne(opt)
+   jumeg=load_jumeg(opt)
+   data = merge_dicts(opt,mne,jumeg)
+   
+   print("\n---> Merged Files:\n")
+   print( dict2str(data) )
 
 
 '''
@@ -314,13 +331,7 @@ Function examples
 
 
 if __name__=="__main__":
-   opt=get_args(sys.argv)
-   mne=load_mne(opt)
-   jumeg=load_jumeg(opt)
-   data = merge_dicts(opt,mne,jumeg)
-   
-   print("\n---> Merged Files:\n")
-   print( dict2str(data) )
+   run()
 
 
    # ToDo
