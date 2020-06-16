@@ -175,7 +175,9 @@ def sort_dict(opt,env):
    env : sorted dict 
    """
    if opt.sorted and env:
-      pass
+      return env.sort()
+   # ToDo
+   # eventual special sorting method
 
 
 def merge_dicts(opt,mne,jumeg):
@@ -187,6 +189,12 @@ def merge_dicts(opt,mne,jumeg):
          env[key]=jumeg.get(key)
    return env
 
+
+def install(opt):
+    if opt.install:
+        fname=opt.name + ".yaml"
+    # ToDo
+    # Conda environment installation with subprocess
 
 
 #=== FB stuff examples
