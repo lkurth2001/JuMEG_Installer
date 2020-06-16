@@ -9,6 +9,7 @@ Created on Thu Jun  4 07:58:13 2020
 import subprocess
 import sys,os,argparse,glob
 import logging
+from copy import deepcopy
 
 import collections,pprint
 
@@ -27,12 +28,12 @@ remote_name={
    "mne":"https://raw.githubusercontent.com/mne-tools/mne-python/master/environment.yml"
    }
 
+
 def check_conda():
-   try:
-      subprocess.run(["conda","--version"],stdout=subprocess.DEVNULL)
-   except:
-      logger.info("You need to have anaconda installed")
+   if subprocess.run(["which","conda"],stdout=subprocess.DEVNULL).returncode==1:
+      logger.error("You need to hav anaconda installed!")
       sys.exit(0)
+
 
 def get_args(argv,parser=None,defaults=None,version=None):
    """
@@ -168,7 +169,7 @@ def show(opt,env):
    if opt.show and env:
       logger.info(dict2str(env))
       
-def sort_dict(opt,env):
+def sort_data(opt,env):
    """
    sorts env dict and returns the sorted dict if sort=true
    
@@ -187,17 +188,7 @@ def sort_dict(opt,env):
    # eventual special sorting method
 
 
-def merge_dicts(opt,mne,jumeg):
-   env=dict()
-   for key in mne.keys():
-      env[key]=mne.get(key)
-   for key in jumeg.keys():
-      if not env.get(key):
-         env[key]=jumeg.get(key)
-   return env
-
-
-def install(opt):
+def install(opt,data):
     if opt.install:
         fname=opt.name + ".yaml"
     # ToDo
@@ -222,21 +213,8 @@ def dict2str(d,intend=2):
     pp = pprint.PrettyPrinter(indent=intend)
     return ''.join(map(str,pp.pformat(d)))     
  
-def run():
-   check_conda()
-   opt=get_args(sys.argv)
-   mne=load_mne(opt)
-   jumeg=load_jumeg(opt)
-   data = merge_dicts(opt,mne,jumeg)
    
-   print("\n---> Merged Files:\n")
-   print( dict2str(data) )
-
-
-'''
-Function examples 
- 
-   def _update_and_merge(self, din, u, depth=-1,do_copy=True):
+def update_and_merge(din, u, depth=-1,do_copy=True):
        """ update and merge dict parameter overwrite defaults
         
        Parameters
@@ -266,14 +244,35 @@ Function examples
           d = din 
        for k, v in u.items():
            if isinstance(v, collections.Mapping) and not depth == 0:
-              r = self._update_and_merge(d.get(k, {}), v, depth=max(depth - 1, -1))
+              r = update_and_merge(d.get(k, {}), v, depth=max(depth - 1, -1))
               d[k] = r
            elif isinstance(d, collections.Mapping):
               d[k] = u[k]
            else:
               d = {k: u[k]}
         
-       return d    
+       return d 
+ 
+   
+def run():
+   check_conda()
+   opt=get_args(sys.argv)
+   mne=load_mne(opt)
+   mne["name"]=opt.name
+   jumeg=load_jumeg(opt)
+   data = update_and_merge(jumeg,mne)
+   data=sort_data(opt,data)
+   show(opt,data)
+   save_env(opt,data)
+   install(opt,data)
+   
+   
+   logger.info("\n---> Merged Files:\n")
+   logger.info( dict2str(data) )
+
+
+'''
+Function examples 
        
    def _check_keys_in_config(self,config=None,keys_to_check=None):
        """
