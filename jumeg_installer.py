@@ -152,12 +152,9 @@ def save_env(opt,env=dict()):
    opt : list of given parameters
    env : dict to save
    """
-   logger.info(bool(env))
    if opt.save and bool(env):
       fname=opt.name + ".yaml"
-      logger.info("test2")
       with open(fname,"w") as f:
-         logger.info("test3")
          yaml.dump(env,f)
 
 
@@ -279,11 +276,9 @@ def run():
 
 def check_envs(opt):
    envs = subprocess.check_output(["conda","env","list"]).splitlines()
-   #active_env = list(filter(lambda s: '*' in str(s), envs))[0]
-   #env_name = str(active_env).split()[0]
    for lines in envs:
       lines=lines.decode("utf-8")
-      if lines.startswith(opt.name):
+      if lines.startswith(opt.name) and lines.endswith(opt.name):
          return True
    return False   
    
