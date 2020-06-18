@@ -13,10 +13,11 @@ from copy import deepcopy
 
 import collections,pprint
 
-try:
-   from ruamel.yaml import YAML
+"""try:
+   from ruamel.yaml import YAML as yaml
 except:
-   import yaml
+   import yaml"""
+import yaml
    
 logger = logging.getLogger('jumeg')
 logging.basicConfig(level=logging.DEBUG)
@@ -51,15 +52,15 @@ def get_args(argv,parser=None,defaults=None,version=None):
    opt : list of parsed parameters
    """
    description="jumeg_installer start parameters"
-   h_cuda=""
-   h_name=""
-   h_fjumeg=""
-   h_fmne=""
-   h_verbose=""
-   h_save=""
-   h_sorted=""
-   h_show=""
-   h_install=""
+   h_cuda="Downloads jumeg file with cuda support"
+   h_name="Sets the name of the new environment file"
+   h_fjumeg="Can set a file used as jumeg file instead of downloading"
+   h_fmne="Can set a file used as mne file instead of downloading"
+   h_verbose="Makes the installation more verbose"
+   h_save="Saves the merged environment file"
+   h_sorted="Sorts the new environment file"
+   h_show="Shows the new environment file in the shell"
+   h_install="Installs a new conda environment"
    if not parser:
       parser = argparse.ArgumentParser(description=description)
    else:
@@ -140,7 +141,7 @@ def load_mne(opt):
    return dict_mne
 
 
-def save_env(opt,env):
+def save_env(opt,env=dict()):
    """
    saves the new environment file with the filename opt.name + .yaml if save is true or overwrites an existing file
    
@@ -149,11 +150,12 @@ def save_env(opt,env):
    opt : list of given parameters
    env : dict to save
    """
-   if opt.save and env:
-      fname=opt.name
-      if not fname.endswith(".yaml"):
-         fname=fname + ".yaml"
+   logger.info(bool(env))
+   if opt.save and bool(env):
+      fname=opt.name + ".yaml"
+      logger.info("test2")
       with open(fname,"w") as f:
+         logger.info("test3")
          yaml.dump(env,f)
 
 
@@ -184,15 +186,22 @@ def sort_data(opt,env):
    """
    if opt.sorted and env:
       return env.sort()
+   else:
+       return env
    # ToDo
    # eventual special sorting method
 
 
-def install(opt,data):
+def install(opt):
     if opt.install:
         fname=opt.name + ".yaml"
-    # ToDo
-    # Conda environment installation with subprocess
+        if subprocess.call(["conda","env","list","|","grep",opt.name])==2:
+            subprocess.run(["conda","deactivate"])
+            subprocess.run(["conda","env","update","--file",fname])
+            subprocess.run(["conda","activate",opt.name])
+        else:
+            subprocess.run(["conda","env","create","-f",fname])
+            subprocess.run(["conda","activate",opt.name])
 
 
 #=== FB stuff examples
@@ -256,19 +265,17 @@ def update_and_merge(din, u, depth=-1,do_copy=True):
    
 def run():
    check_conda()
-   opt=get_args(sys.argv)
-   mne=load_mne(opt)
-   mne["name"]=opt.name
-   jumeg=load_jumeg(opt)
+   opt = get_args(sys.argv)
+   mne = load_mne(opt)
+   mne["name"] = opt.name
+   jumeg = load_jumeg(opt)
    data = update_and_merge(jumeg,mne)
-   data=sort_data(opt,data)
+   data = sort_data(opt,data)
    show(opt,data)
    save_env(opt,data)
-   install(opt,data)
+   install(opt)
    
    
-   logger.info("\n---> Merged Files:\n")
-   logger.info( dict2str(data) )
 
 
 '''
