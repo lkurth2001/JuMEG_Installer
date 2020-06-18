@@ -22,6 +22,8 @@ import yaml
 logger = logging.getLogger('jumeg')
 logging.basicConfig(level=logging.DEBUG)
 
+DEVNULL=subprocess.DEVNULL
+
 
 remote_name={
    "jumeg_cuda":"https://gist.githubusercontent.com/pravsripad/7bb8f696999985b442d9aca8ade19f19/raw/5f88b0493a4037b880d05e95e52f1c9ce9463af8/jumeg_cuda.yml",
@@ -31,7 +33,7 @@ remote_name={
 
 
 def check_conda():
-   if subprocess.run(["which","conda"],stdout=subprocess.DEVNULL).returncode==1:
+   if subprocess.run(["which","conda"],stdout=DEVNULL).returncode==1:
       logger.error("You need to hav anaconda installed!")
       sys.exit(0)
 
@@ -195,13 +197,13 @@ def sort_data(opt,env):
 def install(opt):
     if opt.install:
         fname=opt.name + ".yaml"
-        if subprocess.call(["conda","env","list","|","grep",opt.name])==2:
-            subprocess.run(["conda","deactivate"])
-            subprocess.run(["conda","env","update","--file",fname])
-            subprocess.run(["conda","activate",opt.name])
+        if check_envs(opt):
+            subprocess.run(["conda","deactivate"],stdout=DEVNULL)
+            subprocess.run(["conda","env","update","-n",opt.name,"--file",fname])
+            subprocess.run(["conda","activate",opt.name],stdout=DEVNULL)
         else:
             subprocess.run(["conda","env","create","-f",fname])
-            subprocess.run(["conda","activate",opt.name])
+            subprocess.run(["conda","activate",opt.name],stdout=DEVNULL)
 
 
 #=== FB stuff examples
@@ -274,6 +276,16 @@ def run():
    show(opt,data)
    save_env(opt,data)
    install(opt)
+
+def check_envs(opt):
+   envs = subprocess.check_output(["conda","env","list"]).splitlines()
+   #active_env = list(filter(lambda s: '*' in str(s), envs))[0]
+   #env_name = str(active_env).split()[0]
+   for lines in envs:
+      lines=lines.decode("utf-8")
+      if lines.startswith(opt.name):
+         return True
+   return False   
    
    
 
