@@ -195,6 +195,9 @@ def sort_data(opt,env):
 
 
 def install(opt):
+    """
+    function to install the new conda environment
+    """
     if opt.install:
         fname=opt.name + ".yaml"
         if check_envs(opt):
