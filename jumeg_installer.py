@@ -79,11 +79,14 @@ def get_args(argv,parser=None,defaults=None,version=None):
          "show":False,
          "install":False
          }
+   if len(argv)<2:
+       parser.print_help()
+       sys.exit(-1)
    parser.add_argument("--cuda",action="store_true",help=h_cuda,default=defaults.get("cuda"))
    parser.add_argument("--name",help=h_name,default=defaults.get("name"))
    parser.add_argument("--fjumeg",help=h_fjumeg,default=defaults.get("fjumeg"))
    parser.add_argument("--fmne",help=h_fmne,default=defaults.get("fmne"))
-   parser.add_argument("--verbose",action="store_true",help=h_verbose,default=defaults.get("verbose"))
+   parser.add_argument("-v,--verbose",action="store_true",help=h_verbose,default=defaults.get("verbose"))
    parser.add_argument("--save",action="store_true",help=h_save,default=defaults.get("save"))
    parser.add_argument("--sorted",action="store_true",help=h_sorted,default=defaults.get("sorted"))
    parser.add_argument("--show",action="store_true",help=h_show,default=defaults.get("show"))
@@ -115,7 +118,7 @@ def load_jumeg(opt):
       fname = os.path.basename( remote_name.get("jumeg") )
 
    with open(fname,"r") as f:
-        dict_jumeg = yaml.load(f)
+        dict_jumeg = yaml.safe_load(f)
    return dict_jumeg
        
   
@@ -138,7 +141,7 @@ def load_mne(opt):
       subprocess.run(["curl","--remote-name",remote_name.get("mne")])
       fname = os.path.basename( remote_name.get("mne") )
    with open(fname,"r") as f:
-         dict_mne=yaml.load(f)
+         dict_mne=yaml.safe_load(f)
 
    return dict_mne
 
@@ -251,10 +254,10 @@ def update_and_merge(din, u, depth=-1,do_copy=True):
        else:
           d = din 
        for k, v in u.items():
-           if isinstance(v, collections.Mapping) and not depth == 0:
+           if isinstance(v, collections.abc.Mapping) and not depth == 0:
               r = update_and_merge(d.get(k, {}), v, depth=max(depth - 1, -1))
               d[k] = r
-           elif isinstance(d, collections.Mapping):
+           elif isinstance(d, collections.abc.Mapping):
               d[k] = u[k]
            else:
               d = {k: u[k]}
