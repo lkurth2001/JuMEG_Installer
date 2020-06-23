@@ -206,7 +206,7 @@ def install(opt):
     """
     if opt.install:
         fname=opt.name + ".yaml"
-        if check_envs(opt):
+        if check_envs(opt.name):
             subprocess.run(["conda","deactivate"],stdout=DEVNULL)
             subprocess.run(["conda","env","update","-n",opt.name,"--file",fname])
             subprocess.run(["conda","activate",opt.name],stdout=DEVNULL)
@@ -286,11 +286,11 @@ def run():
    save_env(opt,data)
    install(opt)
 
-def check_envs(opt):
+def check_envs(name):
    envs = subprocess.check_output(["conda","env","list"]).splitlines()
    for lines in envs:
       lines=lines.decode("utf-8")
-      if lines.startswith(opt.name) and lines.endswith(opt.name):
+      if lines == name:
          return True
    return False   
    
