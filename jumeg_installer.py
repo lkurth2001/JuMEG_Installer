@@ -172,6 +172,9 @@ def show(opt,env):
    """
    if opt.show and env:
       logger.info(dict2str(env))
+   elif opt.show:
+      logger.error("No environment file found")
+      
       
 def sort_data(opt,env):
    """
@@ -187,7 +190,10 @@ def sort_data(opt,env):
    env : sorted dict 
    """
    if opt.sorted and env:
-      return env.sort()
+      result=dict()
+      for key in sorted(env):
+         result[key]=env.get(key)
+      return result
    else:
        return env
    # ToDo
