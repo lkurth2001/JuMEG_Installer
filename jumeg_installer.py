@@ -94,6 +94,16 @@ def get_args(argv,parser=None,defaults=None,version=None):
    opt=parser.parse_args()
    return opt
 
+def _load_env_file(name):
+    subprocess.run(["curl","--remote-name",remote_name.get(name)])
+    fname = os.path.basename( remote_name.get(name) )
+    return fname
+
+def _file_to_dict(fname):
+   env_dict=dict()
+   with open(fname,"r") as f:
+        env_dict= yaml.safe_load(f)
+   return env_dict
 
 def load_jumeg(opt):
    """
@@ -107,20 +117,28 @@ def load_jumeg(opt):
    -------
    dict_jumeg : dict filled with values from jumeg environment file
    """
-   dict_jumeg=dict()
    if opt.fjumeg:
       fname = opt.fjumeg
    elif opt.cuda:
-      subprocess.run(["curl","--remote-name",remote_name.get("jumeg_cuda")])
-      fname = os.path.basename( remote_name.get("jumeg_cuda") )
+      fname=_load_env_file("jumeg_cuda")
    else:
-      subprocess.run(["curl","--remote-name",remote_name.get("jumeg")])
-      fname = os.path.basename( remote_name.get("jumeg") )
+      fname=_load_env_file("jumeg")
 
-   with open(fname,"r") as f:
-        dict_jumeg = yaml.safe_load(f)
-   return dict_jumeg
+   return _file_to_dict(fname)
+
+def check_version(data=dict()):
+    result=dict()
+    for key in data.keys():
+        akt=data.get(key)
+        if type(akt)==list:
+            for elem in akt:
+                if type(elem)==dict:
+                    result[elem]=check_version(elem)
+                elif type(elem)==str:
+                    pass
        
+def merge_dicts(mne=dict(),jumeg=dict()):
+    pass
   
 def load_mne(opt):
    """
@@ -134,16 +152,12 @@ def load_mne(opt):
    -------
    dict_mne : dict filled with values from mne environment file
    """
-   dict_mne=dict()
    if opt.fmne:
       fname = opt.fmne
    else:
-      subprocess.run(["curl","--remote-name",remote_name.get("mne")])
-      fname = os.path.basename( remote_name.get("mne") )
-   with open(fname,"r") as f:
-         dict_mne=yaml.safe_load(f)
-
-   return dict_mne
+      fname=_load_env_file("mne")
+   
+   return _file_to_dict(fname)
 
 
 def save_env(opt,env=dict()):
