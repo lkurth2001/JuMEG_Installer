@@ -159,7 +159,6 @@ def compare_versions(mne=dict(),jumeg=dict()):
        
 def merge_dicts(mne=dict(),jumeg=dict()):
     no_merge=compare_versions(mne,jumeg)
-    logger.info(no_merge)
     for key in jumeg.keys():
        if not key in mne.keys():
           mne[key]=jumeg.get(key)
@@ -203,18 +202,22 @@ def load_mne(opt):
 
 def save_env(opt,env=dict()):
    """
-   saves the new environment file with the filename opt.name + .yaml if save is true or overwrites an existing file
+   saves the new environment file with the filename opt.name + .yml if save is true or overwrites an existing file
    
    Parameters
    ----------
    opt : list of given parameters
    env : dict to save
    """
-   if opt.save and bool(env):
-      fname=opt.name + ".yaml"
+   if bool(env):
+      fname=opt.name + ".yml"
       with open(fname,"w") as f:
          yaml.dump(env,f)
-
+         
+def delete_env_file(opt):
+   if not opt.save:
+      fname=opt.name+".yml"
+      subprocess.run(["rm",fname])
 
 def show(opt,env):
    """
@@ -260,7 +263,7 @@ def install(opt):
     function to install the new conda environment
     """
     if opt.install:
-        fname=opt.name + ".yaml"
+        fname=opt.name + ".yml"
         if check_envs(opt.name):
             subprocess.run(["conda","deactivate"],stdout=DEVNULL)
             subprocess.run(["conda","env","update","-n",opt.name,"--file",fname])
@@ -340,6 +343,7 @@ def run():
    show(opt,data)
    save_env(opt,data)
    install(opt)
+   delete_env_file(opt)
    
 def run_test():
    opt=get_args(sys.argv)
