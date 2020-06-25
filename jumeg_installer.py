@@ -133,12 +133,53 @@ def check_version(data=dict()):
         if type(akt)==list:
             for elem in akt:
                 if type(elem)==dict:
-                    result[elem]=check_version(elem)
+                    for key2 in elem.keys():
+                       result[key2]=check_version(elem)
                 elif type(elem)==str:
-                    pass
+                    if len(elem.split(">"))>1:
+                       result[elem.split(">")[0]]=elem
+                    elif len(elem.split("<"))>1:
+                       result[elem.split("<")[0]]=elem
+                    elif len(elem.split("="))>1:
+                       result[elem.split("=")[0]]=elem
+                    else:
+                       continue
+    return result
+ 
+def compare_versions(mne=dict(),jumeg=dict()):
+    mne=check_version(mne)
+    jumeg=check_version(jumeg)
+    tmp=list()
+    for key in jumeg.keys():
+       if not key in mne.keys():
+          tmp.append(key)
+    for key in tmp:
+       jumeg.pop(key)
+    return jumeg
        
 def merge_dicts(mne=dict(),jumeg=dict()):
-    pass
+    no_merge=compare_versions(mne,jumeg)
+    logger.info(no_merge)
+    for key in jumeg.keys():
+       if not key in mne.keys():
+          mne[key]=jumeg.get(key)
+       elif type(jumeg.get(key))==list:
+          for elem in jumeg.get(key):
+             if type(elem)==dict:
+                for key2 in elem.keys():
+                   index=find_dict_in_list(mne.get(key), key2)
+                   mne.get(key)[index]=merge_dicts(mne.get(key)[index],elem)
+             else:
+                if not elem in no_merge.values() and not elem in mne.get(key) and not elem.startswith("mne"):
+                   mne.get(key).append(elem)
+    return mne
+    
+def find_dict_in_list(l,name):
+   for elem in l:
+      if type(elem)==dict:
+         if list(elem.keys())[0]==name:
+            return l.index(elem)
+   return None
   
 def load_mne(opt):
    """
@@ -294,12 +335,19 @@ def run():
    mne = load_mne(opt)
    mne["name"] = opt.name
    jumeg = load_jumeg(opt)
-   data = update_and_merge(jumeg,mne)
+   data = merge_dicts(mne,jumeg)
    data = sort_data(opt,data)
    show(opt,data)
    save_env(opt,data)
    install(opt)
-
+   
+def run_test():
+   opt=get_args(sys.argv)
+   mne=load_mne(opt)
+   jumeg=load_jumeg(opt)
+   #logger.info(compare_versions(mne,jumeg))
+   logger.info(merge_dicts(mne,jumeg))
+   
 def check_envs(name):
    envs = subprocess.check_output(["conda","env","list"]).splitlines()
    for lines in envs:
@@ -371,6 +419,7 @@ Function examples
 
 if __name__=="__main__":
    run()
+   #run_test()
 
 
    # ToDo
