@@ -33,6 +33,9 @@ remote_name={
 
 
 def check_conda():
+   """
+   function which checks if anaconda is installed, if not the programme stops and sends an error
+   """
    if subprocess.run(["which","conda"],stdout=DEVNULL).returncode==1:
       logger.error("You need to hav anaconda installed!")
       sys.exit(0)
@@ -95,11 +98,17 @@ def get_args(argv,parser=None,defaults=None,version=None):
    return opt
 
 def _load_env_file(name):
+    """
+    function to download an environment file with the name name 
+    """
     subprocess.run(["curl","--remote-name",remote_name.get(name)])
     fname = os.path.basename( remote_name.get(name) )
     return fname
 
 def _file_to_dict(fname):
+   """
+   function to build a python dict out of a file
+   """
    env_dict=dict()
    with open(fname,"r") as f:
         env_dict= yaml.safe_load(f)
@@ -127,6 +136,9 @@ def load_jumeg(opt):
    return _file_to_dict(fname)
 
 def check_version(data=dict()):
+    """
+    checks the verions of the parameters in the dict and returns them
+    """
     result=dict()
     for key in data.keys():
         akt=data.get(key)
@@ -147,6 +159,9 @@ def check_version(data=dict()):
     return result
  
 def compare_versions(mne=dict(),jumeg=dict()):
+    """
+    compares the two version dicts to delete the unneccessary ones and then return the updated dicts
+    """
     mne=check_version(mne)
     jumeg=check_version(jumeg)
     tmp=list()
