@@ -100,6 +100,14 @@ def get_args(argv,parser=None,defaults=None,version=None):
 def _load_env_file(name):
     """
     function to download an environment file with the name name 
+    
+    Parameters
+    ----------
+    name : name of the file to download
+    
+    Returns
+    -------
+    fname : name of the downloaded env file
     """
     subprocess.run(["curl","--remote-name",remote_name.get(name)])
     fname = os.path.basename( remote_name.get(name) )
@@ -108,6 +116,14 @@ def _load_env_file(name):
 def _file_to_dict(fname):
    """
    function to build a python dict out of a file
+   
+   Parameters
+   ----------
+   fname : file which should be converted to a dict
+   
+   Returns
+   -------
+   env_dict : dict build out of the env file
    """
    env_dict=dict()
    with open(fname,"r") as f:
@@ -138,6 +154,14 @@ def load_jumeg(opt):
 def check_version(data=dict()):
     """
     checks the verions of the parameters in the dict and returns them
+    
+    Parameters
+    ----------
+    data : dict which is checked
+    
+    Returns
+    -------
+    result : dict with the version names and numbers
     """
     result=dict()
     for key in data.keys():
@@ -160,7 +184,17 @@ def check_version(data=dict()):
  
 def compare_versions(mne=dict(),jumeg=dict()):
     """
-    compares the two version dicts to delete the unneccessary ones and then return the updated dicts
+    compares the two version dicts to delete the unneccessary ones
+    and then return the updated dicts
+    
+    Parameters
+    ----------
+    mne : dict with the mne parameters
+    jumeg : dict with the jumeg parameters
+    
+    Returns
+    -------
+    jumeg : updated dict
     """
     mne=check_version(mne)
     jumeg=check_version(jumeg)
@@ -173,6 +207,18 @@ def compare_versions(mne=dict(),jumeg=dict()):
     return jumeg
        
 def merge_dicts(mne=dict(),jumeg=dict()):
+    """
+    function to merge two dicts with one priorised
+    
+    Parameters
+    ----------
+    mne : dict with mne parameters
+    jumeg : dict with jumeg parameters
+    
+    Returns
+    -------
+    mne : merged dict
+    """
     no_merge=compare_versions(mne,jumeg)
     for key in jumeg.keys():
        if not key in mne.keys():
@@ -189,6 +235,19 @@ def merge_dicts(mne=dict(),jumeg=dict()):
     return mne
     
 def find_dict_in_list(l,name):
+   """
+   function to find a dict in a list
+   
+   Parameters
+   ----------
+   l : list in which is searched
+   name : name of the dict which is searched
+   
+   Returns
+   -------
+   index of the dict in the list if found
+   otherwise None
+   """
    for elem in l:
       if type(elem)==dict:
          if list(elem.keys())[0]==name:
@@ -230,6 +289,13 @@ def save_env(opt,env=dict()):
          yaml.dump(env,f)
          
 def delete_env_file(opt):
+   """
+   function to delete the generated env file if save is false
+   
+   Parameters
+   ----------
+   opt : list of given parameters
+   """
    if not opt.save:
       fname=opt.name+".yml"
       subprocess.run(["rm",fname])
@@ -276,6 +342,10 @@ def sort_data(opt,env):
 def install(opt):
     """
     function to install the new conda environment
+    
+    Parameters
+    ----------
+    opt : list of given parameters
     """
     if opt.install:
         fname=opt.name + ".yml"
@@ -343,7 +413,6 @@ def update_and_merge(din, u, depth=-1,do_copy=True):
               d[k] = u[k]
            else:
               d = {k: u[k]}
-        
        return d 
  
    
