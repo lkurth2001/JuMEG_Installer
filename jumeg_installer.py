@@ -182,9 +182,14 @@ def check_version(data=dict()):
                        continue
     return result
  
+def check_version2(data=dict()):
+   result=list()
+   for key in data.keys():
+      pass
+ 
 def compare_versions(mne=dict(),jumeg=dict()):
     """
-    compares the two version dicts to delete the unneccessary ones
+    compares the two version dicts to delete the unnecessary ones
     and then return the updated dicts
     
     Parameters
@@ -205,7 +210,14 @@ def compare_versions(mne=dict(),jumeg=dict()):
     for key in tmp:
        jumeg.pop(key)
     return jumeg
-       
+
+def compare_versions2(mne=dict(),jumeg=dict()):
+   mne=check_version(mne)
+   jumeg=check_version(jumeg)
+   mne.update(jumeg)
+   return mne
+   
+
 def merge_dicts(mne=dict(),jumeg=dict()):
     """
     function to merge two dicts with one priorised
@@ -233,6 +245,18 @@ def merge_dicts(mne=dict(),jumeg=dict()):
                 if not elem in no_merge.values() and not elem in mne.get(key) and not elem.startswith("mne"):
                    mne.get(key).append(elem)
     return mne
+ 
+def merge_dicts2(mne=dict(),jumeg=dict()):
+   merge=compare_versions(mne,jumeg)
+   for key in mne.keys():
+      akt=mne.get(key)
+      logger.info(type(akt))
+      if type(akt)==dict:
+         akt.update(jumeg.get(key))
+      elif type(akt)==list:
+         akt.extend(x for x in jumeg.get(key) if x not in akt)
+   return mne
+   
     
 def find_dict_in_list(l,name):
    """
@@ -253,7 +277,7 @@ def find_dict_in_list(l,name):
          if list(elem.keys())[0]==name:
             return l.index(elem)
    return None
-  
+
 def load_mne(opt):
    """
    function to load the mne environment file as a python dict
@@ -433,10 +457,24 @@ def run_test():
    opt=get_args(sys.argv)
    mne=load_mne(opt)
    jumeg=load_jumeg(opt)
+   #logger.info(check_version(mne))
+   #logger.info(check_version(jumeg))
    #logger.info(compare_versions(mne,jumeg))
    logger.info(merge_dicts(mne,jumeg))
    
 def check_envs(name):
+   """
+   function to check if there is an environment with a specified name
+   
+   Parameters
+   ----------
+   name : name of the environment which is searched
+   
+   Returns
+   -------
+   True if environment is found
+   else False
+   """
    envs = subprocess.check_output(["conda","env","list"]).splitlines()
    for lines in envs:
       lines=lines.decode("utf-8")
@@ -506,8 +544,8 @@ Function examples
 
 
 if __name__=="__main__":
-   run()
-   #run_test()
+   #run()
+   run_test()
 
 
    # ToDo
