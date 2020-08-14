@@ -457,10 +457,10 @@ def run_test():
    opt=get_args(sys.argv)
    mne=load_mne(opt)
    jumeg=load_jumeg(opt)
-   #logger.info(check_version(mne))
-   #logger.info(check_version(jumeg))
-   #logger.info(compare_versions(mne,jumeg))
-   logger.info(merge_dicts(mne,jumeg))
+   logger.info(check_version(mne))
+   logger.info(check_version(jumeg))
+   logger.info(compare_versions(mne,jumeg))
+   #logger.info(merge_dicts(mne,jumeg))
    
 def check_envs(name):
    """
