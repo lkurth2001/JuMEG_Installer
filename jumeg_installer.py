@@ -256,7 +256,19 @@ def merge_dicts2(mne=dict(),jumeg=dict()):
       elif type(akt)==list:
          akt.extend(x for x in jumeg.get(key) if x not in akt)
    return mne
-   
+
+def merge_dicts3(mne=dict(),jumeg=dict()):
+    for key in mne.keys():
+        if not key in jumeg.keys():
+            jumeg[key]=mne.get(key)
+        elif type(mne.get(key))==list and type(jumeg.get(key))==list:
+            jumeg[key]=merge_lists(mne.get(key),jumeg.get(key))
+        elif type(mne.get(key))==dict and type(jumeg.get(key))==dict:
+            jumeg[key]=merge_dicts3(mne.get(key),jumeg.get(key))
+    pass
+
+def merge_lists(mne=list(),jumeg=list()):
+    pass
     
 def find_dict_in_list(l,name):
    """
