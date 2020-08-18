@@ -271,6 +271,19 @@ def merge_dicts3(mne=dict(),jumeg=dict()):
     return jumeg
 
 def merge_lists(mne=list(),jumeg=list(),no_merge=dict()):
+    """
+    function to merge two lists with one preferred
+    
+    Parameters
+    ----------
+    mne : list with the mne part
+    jumeg : list with the jumeg part
+    no_merge : dict with keys and values which should not be merged
+    
+    Returns
+    -------
+    jumeg : merged list
+    """
     for elem in mne:
        if type(elem)==dict:
           for item in jumeg:
@@ -423,6 +436,17 @@ def dict2str(d,intend=2):
     return ''.join(map(str,pp.pformat(d)))     
  
 def structure(data=dict):
+   """
+   function to bring the data in the right order for creating an environment
+   
+   Parameters
+   ----------
+   data : dict with the merged datas
+   
+   Returns
+   -------
+   tmp : sorted dict
+   """
    tmp=dict()
    tmp["name"]=data.get("name")
    tmp["channels"]=data.get("channels")
@@ -438,46 +462,6 @@ def structure(data=dict):
    akt[length]=saved
    return tmp
    
- 
-   
-def update_and_merge(din, u, depth=-1,do_copy=True):
-       """ update and merge dict parameter overwrite defaults
-        
-       Parameters
-       ----------
-       dict with defaults parameter
-       dict with parameter to merge or update
-       depth: recusive level <-1>
-                
-       Result
-       -------
-       dict with merged and updated parameters
-        
-       Example
-       -------
-       copy from:
-       http://stackoverflow.com/questions/3232943/update-value-of-a-nested-dictionary-of-varying-depth
-        
-       Recursively merge or update dict-like objects. 
-       >>> update({'k1': {'k2': 2}}, {'k1': {'k2': {'k3': 3}}, 'k4': 4})
-       {'k1': {'k2': {'k3': 3}}, 'k4': 4}
-       return dict
-       """
-        
-       if do_copy:
-          d = deepcopy(din)
-       else:
-          d = din 
-       for k, v in u.items():
-           if isinstance(v, collections.abc.Mapping) and not depth == 0:
-              r = update_and_merge(d.get(k, {}), v, depth=max(depth - 1, -1))
-              d[k] = r
-           elif isinstance(d, collections.abc.Mapping):
-              d[k] = u[k]
-           else:
-              d = {k: u[k]}
-       return d 
- 
    
 def run():
    check_conda()
@@ -522,65 +506,6 @@ def check_envs(name):
          return True
    return False   
    
-   
-
-
-'''
-Function examples 
-       
-   def _check_keys_in_config(self,config=None,keys_to_check=None):
-       """
-       
-
-       Parameters
-       ----------
-       config : TYPE, optional
-           DESCRIPTION. The default is None.
-       keys_to_check : TYPE, optional
-           DESCRIPTION. The default is None.
-
-       Returns
-       -------
-       config : dict, config dict 
-       missing_keys : dict, <missing keys> in config dict
-
-       """
-       if not config:
-          config = self.config 
-       k = config.keys()
-       
-       if not keys_to_check:
-          keys_to_check = self.keys_to_check
-       
-       missing_keys = dict() 
-       #-- ToDo make recursive
-       for k in keys_to_check.keys():
-           if k in config:
-               
-              kdefaults = keys_to_check[k]
-              if isinstance(config[k],dict):
-                 kcfg = config[k].keys()
-              else:
-                 kcfg = config[k] 
-              kdiff     = ( set( kdefaults) - set( kcfg ) )
-              if kdiff:
-                 missing_keys[k] = kdiff  
-           else:
-              missing_keys[k] = []  
-              
-       if missing_keys:  
-          msg = ["ERROR  missing keys in config"]
-          for k in missing_keys:
-              msg.append(" --> {}:\n  -> {}".format(k,missing_keys))
-          logger.error("\n".join(msg))
-       
-       return config,missing_keys     
- 
-'''
-
-
-
-
 
 
 if __name__=="__main__":
