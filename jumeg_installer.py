@@ -273,7 +273,9 @@ def merge_dicts3(mne=dict(),jumeg=dict()):
 def merge_lists(mne=list(),jumeg=list(),no_merge=dict()):
     for elem in mne:
        if type(elem)==dict:
-          pass
+          for item in jumeg:
+             if type(item)==dict:
+                merge_dicts3(elem,item)
        elif not elem in no_merge.values() and not elem in no_merge.keys() and not elem in jumeg:
           jumeg.append(elem)
     return jumeg
