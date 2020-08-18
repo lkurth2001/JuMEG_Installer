@@ -466,8 +466,8 @@ def run():
    check_conda()
    opt = get_args(sys.argv)
    mne = load_mne(opt)
-   mne["name"] = opt.name
    jumeg = load_jumeg(opt)
+   jumeg["name"] = opt.name
    data = merge_dicts3(mne,jumeg)
    data = sort_data(opt,data)
    show(opt,data)
