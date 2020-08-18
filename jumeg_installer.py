@@ -179,7 +179,7 @@ def check_version(data=dict()):
                     elif len(elem.split("="))>1:
                        result[elem.split("=")[0]]=elem
                     else:
-                       continue
+                       result[elem]=elem
     return result
  
 def check_version2(data=dict()):
@@ -204,12 +204,12 @@ def compare_versions(mne=dict(),jumeg=dict()):
     mne=check_version(mne)
     jumeg=check_version(jumeg)
     tmp=list()
-    for key in jumeg.keys():
-       if not key in mne.keys():
+    for key in mne.keys():
+       if not key in jumeg.keys() and not type(mne.get(key))==dict:
           tmp.append(key)
     for key in tmp:
-       jumeg.pop(key)
-    return jumeg
+       mne.pop(key)
+    return mne
 
 def compare_versions2(mne=dict(),jumeg=dict()):
    mne=check_version(mne)
@@ -258,17 +258,25 @@ def merge_dicts2(mne=dict(),jumeg=dict()):
    return mne
 
 def merge_dicts3(mne=dict(),jumeg=dict()):
+    no_merge=compare_versions(mne,jumeg)
     for key in mne.keys():
         if not key in jumeg.keys():
             jumeg[key]=mne.get(key)
         elif type(mne.get(key))==list and type(jumeg.get(key))==list:
-            jumeg[key]=merge_lists(mne.get(key),jumeg.get(key))
+            jumeg[key]=merge_lists(mne.get(key),jumeg.get(key),no_merge)
         elif type(mne.get(key))==dict and type(jumeg.get(key))==dict:
             jumeg[key]=merge_dicts3(mne.get(key),jumeg.get(key))
-    pass
+        elif type(jumeg.get(key))==list:
+           jumeg.get(key).append(mne.get(key))
+    return jumeg
 
-def merge_lists(mne=list(),jumeg=list()):
-    pass
+def merge_lists(mne=list(),jumeg=list(),no_merge=dict()):
+    for elem in mne:
+       if type(elem)==dict:
+          pass
+       elif not elem in no_merge.values() and not elem in no_merge.keys() and not elem in jumeg:
+          jumeg.append(elem)
+    return jumeg
     
 def find_dict_in_list(l,name):
    """
@@ -458,7 +466,7 @@ def run():
    mne = load_mne(opt)
    mne["name"] = opt.name
    jumeg = load_jumeg(opt)
-   data = merge_dicts(mne,jumeg)
+   data = merge_dicts3(mne,jumeg)
    data = sort_data(opt,data)
    show(opt,data)
    save_env(opt,data)
@@ -469,10 +477,10 @@ def run_test():
    opt=get_args(sys.argv)
    mne=load_mne(opt)
    jumeg=load_jumeg(opt)
-   logger.info(check_version(mne))
-   logger.info(check_version(jumeg))
+   #logger.info(check_version(mne))
+   #logger.info(check_version(jumeg))
    logger.info(compare_versions(mne,jumeg))
-   #logger.info(merge_dicts(mne,jumeg))
+   #logger.info(merge_dicts3(mne,jumeg))
    
 def check_envs(name):
    """
@@ -556,8 +564,8 @@ Function examples
 
 
 if __name__=="__main__":
-   #run()
-   run_test()
+   run()
+   #run_test()
 
 
    # ToDo
