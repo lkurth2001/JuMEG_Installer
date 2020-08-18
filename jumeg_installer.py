@@ -422,6 +422,23 @@ def dict2str(d,intend=2):
     pp = pprint.PrettyPrinter(indent=intend)
     return ''.join(map(str,pp.pformat(d)))     
  
+def structure(data=dict):
+   tmp=dict()
+   tmp["name"]=data.get("name")
+   tmp["channels"]=data.get("channels")
+   tmp["dependencies"]=data.get("dependencies")
+   akt=tmp.get("dependencies")
+   length=len(akt)-1
+   saved=akt[length]
+   akt2=akt[length]
+   while not type(akt2)==dict:
+      length=length-1
+      akt2=akt[length]
+   akt[len(akt)-1]=akt[length]
+   akt[length]=saved
+   return tmp
+   
+ 
    
 def update_and_merge(din, u, depth=-1,do_copy=True):
        """ update and merge dict parameter overwrite defaults
@@ -470,6 +487,7 @@ def run():
    jumeg["name"] = opt.name
    data = merge_dicts3(mne,jumeg)
    data = sort_data(opt,data)
+   data = structure(data)
    show(opt,data)
    save_env(opt,data)
    install(opt)
