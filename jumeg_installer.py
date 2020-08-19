@@ -24,13 +24,11 @@ logging.basicConfig(level=logging.DEBUG)
 
 DEVNULL=subprocess.DEVNULL
 
-
 remote_name={
    "jumeg_cuda":"https://gist.githubusercontent.com/pravsripad/7bb8f696999985b442d9aca8ade19f19/raw/5f88b0493a4037b880d05e95e52f1c9ce9463af8/jumeg_cuda.yml",
    "jumeg":"https://gist.githubusercontent.com/pravsripad/0361ffee14913487eb7b7ef43c9367fe/raw/8299c6bff6386a037af046cab5483af45c037c4f/jumeg.yml",
    "mne":"https://raw.githubusercontent.com/mne-tools/mne-python/master/environment.yml"
    }
-
 
 def check_conda():
    """
@@ -130,21 +128,22 @@ def _file_to_dict(fname):
         env_dict= yaml.safe_load(f)
    return env_dict
 
-def load_jumeg(opt):
+def load_jumeg(fjumeg,cuda):
    """
    function to load the jumeg environment file as a python dict
    
    Parameters
    ----------
-   opt : list of given parameters
+   fjumeg : name of the jumeg file
+   cuda : bool if cuda support is needed
    
    Returns
    -------
    dict_jumeg : dict filled with values from jumeg environment file
    """
-   if opt.fjumeg:
-      fname = opt.fjumeg
-   elif opt.cuda:
+   if fjumeg:
+      fname = fjumeg
+   elif cuda:
       fname=_load_env_file("jumeg_cuda")
    else:
       fname=_load_env_file("jumeg")
@@ -182,11 +181,6 @@ def check_version(data=dict()):
                        result[elem]=elem
     return result
  
-def check_version2(data=dict()):
-   result=list()
-   for key in data.keys():
-      pass
- 
 def compare_versions(mne=dict(),jumeg=dict()):
     """
     compares the two version dicts to delete the unnecessary ones
@@ -217,7 +211,6 @@ def compare_versions2(mne=dict(),jumeg=dict()):
    mne.update(jumeg)
    return mne
    
-
 def merge_dicts(mne=dict(),jumeg=dict()):
     """
     function to merge two dicts with one priorised
@@ -245,17 +238,6 @@ def merge_dicts(mne=dict(),jumeg=dict()):
                 if not elem in no_merge.values() and not elem in mne.get(key) and not elem.startswith("mne"):
                    mne.get(key).append(elem)
     return mne
- 
-def merge_dicts2(mne=dict(),jumeg=dict()):
-   merge=compare_versions(mne,jumeg)
-   for key in mne.keys():
-      akt=mne.get(key)
-      logger.info(type(akt))
-      if type(akt)==dict:
-         akt.update(jumeg.get(key))
-      elif type(akt)==list:
-         akt.extend(x for x in jumeg.get(key) if x not in akt)
-   return mne
 
 def merge_dicts3(mne=dict(),jumeg=dict()):
     no_merge=compare_versions(mne,jumeg)
@@ -313,81 +295,79 @@ def find_dict_in_list(l,name):
             return l.index(elem)
    return None
 
-def load_mne(opt):
+def load_mne(fmne):
    """
    function to load the mne environment file as a python dict
    
    Parameters
    ----------
-   opt : list of given parameters
+   fmne : name of mne file
    
    Returns
    -------
    dict_mne : dict filled with values from mne environment file
    """
-   if opt.fmne:
-      fname = opt.fmne
+   if fmne:
+      fname = fmne
    else:
       fname=_load_env_file("mne")
    
    return _file_to_dict(fname)
 
-
-def save_env(opt,env=dict()):
+def save_env(name,env=dict()):
    """
    saves the new environment file with the filename opt.name + .yml if save is true or overwrites an existing file
    
    Parameters
    ----------
-   opt : list of given parameters
+   name : name of the generated env file
    env : dict to save
    """
    if bool(env):
-      fname=opt.name + ".yml"
+      fname=name + ".yml"
       with open(fname,"w") as f:
          yaml.dump(env,f)
          
-def delete_env_file(opt):
+def delete_env_file(save,name):
    """
    function to delete the generated env file if save is false
    
    Parameters
    ----------
-   opt : list of given parameters
+   save : if save is true the file is saved else it is deleted
    """
-   if not opt.save:
-      fname=opt.name+".yml"
+   if not save:
+      fname=name+".yml"
       subprocess.run(["rm",fname])
 
-def show(opt,env):
+def show(bShow,env):
    """
    shows the new generated environment file if show is true
    
    Parameters
    ----------
-   opt : list of given parameters
+   bShow : if true the file is shown in the shell
    env : dict with values of new environment file
    """
-   if opt.show and env:
+   if bShow and env:
       logger.info(dict2str(env))
-   elif opt.show:
+   elif bShow:
       logger.error("No environment file found")
       
-      
-def sort_data(opt,env):
+def sort_data(bSorted,env):
    """
    sorts env dict and returns the sorted dict if sort=true
    
    Parameters
    ----------
-   opt : list of given parameters
+   bSorted : if true the dict gets sorted
    env : dict with values of environment file
    
    Returns
    -------
    env : sorted dict 
    """
-   if opt.sorted and env:
+   if bSorted and env:
       result=dict()
       for key in sorted(env):
          result[key]=env.get(key)
@@ -397,8 +377,7 @@ def sort_data(opt,env):
    # ToDo
    # eventual special sorting method
 
-
-def install(opt):
+def install(bInstall,name):
     """
     function to install the new conda environment
     
@@ -406,18 +385,15 @@ def install(opt):
     ----------
     opt : list of given parameters
     """
-    if opt.install:
-        fname=opt.name + ".yml"
-        if check_envs(opt.name):
+    if bInstall:
+        fname=name + ".yml"
+        if check_envs(name):
             subprocess.run(["conda","deactivate"],stdout=DEVNULL)
-            subprocess.run(["conda","env","update","-n",opt.name,"--file",fname])
-            subprocess.run(["conda","activate",opt.name],stdout=DEVNULL)
+            subprocess.run(["conda","env","update","-n",name,"--file",fname])
+            subprocess.run(["conda","activate",name],stdout=DEVNULL)
         else:
             subprocess.run(["conda","env","create","-f",fname])
-            subprocess.run(["conda","activate",opt.name],stdout=DEVNULL)
-
-
-#=== FB stuff examples
+            subprocess.run(["conda","activate",name],stdout=DEVNULL)
 
 def dict2str(d,intend=2):
     """
@@ -462,25 +438,24 @@ def structure(data=dict):
    akt[length]=saved
    return tmp
    
-   
 def run():
    check_conda()
    opt = get_args(sys.argv)
-   mne = load_mne(opt)
-   jumeg = load_jumeg(opt)
+   mne = load_mne(opt.fmne)
+   jumeg = load_jumeg(opt.fjumeg,opt.cuda)
    jumeg["name"] = opt.name
    data = merge_dicts3(mne,jumeg)
-   data = sort_data(opt,data)
+   data = sort_data(opt.sorted,data)
    data = structure(data)
-   show(opt,data)
-   save_env(opt,data)
-   install(opt)
-   delete_env_file(opt)
+   show(opt.show,data)
+   save_env(opt.name,data)
+   install(opt.install,opt.name)
+   delete_env_file(opt.save,opt.name)
    
 def run_test():
    opt=get_args(sys.argv)
-   mne=load_mne(opt)
-   jumeg=load_jumeg(opt)
+   mne=load_mne(opt.fmne)
+   jumeg=load_jumeg(opt.fjumeg,opt.cuda)
    #logger.info(check_version(mne))
    #logger.info(check_version(jumeg))
    logger.info(compare_versions(mne,jumeg))
@@ -506,8 +481,6 @@ def check_envs(name):
          return True
    return False   
    
-
-
 if __name__=="__main__":
    run()
    #run_test()
