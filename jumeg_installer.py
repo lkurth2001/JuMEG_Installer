@@ -147,7 +147,6 @@ def load_jumeg(fjumeg,cuda):
       fname=_load_env_file("jumeg_cuda")
    else:
       fname=_load_env_file("jumeg")
-
    return _file_to_dict(fname)
 
 def check_version(data=dict()):
@@ -205,7 +204,7 @@ def compare_versions(mne=dict(),jumeg=dict()):
        mne.pop(key)
     return mne
 
-#def merge_dicts(mne=dict(),jumeg=dict()):
+def merge_dicts2(mne=dict(),jumeg=dict()):
     """
     function to merge two dicts with one priorised
     
@@ -218,7 +217,7 @@ def compare_versions(mne=dict(),jumeg=dict()):
     -------
     mne : merged dict
     """
-    """no_merge=compare_versions(mne,jumeg)
+    no_merge=compare_versions(mne,jumeg)
     for key in jumeg.keys():
        if not key in mne.keys():
           mne[key]=jumeg.get(key)
@@ -231,7 +230,7 @@ def compare_versions(mne=dict(),jumeg=dict()):
              else:
                 if not elem in no_merge.values() and not elem in mne.get(key) and not elem.startswith("mne"):
                    mne.get(key).append(elem)
-    return mne"""
+    return mne
 
 def merge_dicts(mne=dict(),jumeg=dict()):
     """
@@ -333,7 +332,7 @@ def save_env(name,env=dict()):
       fname=name + ".yml"
       with open(fname,"w") as f:
          yaml.dump(env,f)
-         
+
 def delete_env_file(save,name):
    """
    function to delete the generated env file if save is false
@@ -380,8 +379,6 @@ def sort_data(bSorted,env):
       return result
    else:
        return env
-   # ToDo
-   # eventual special sorting method
 
 def install(bInstall,name):
     """
