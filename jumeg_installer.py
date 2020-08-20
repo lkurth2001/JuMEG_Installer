@@ -205,13 +205,7 @@ def compare_versions(mne=dict(),jumeg=dict()):
        mne.pop(key)
     return mne
 
-def compare_versions2(mne=dict(),jumeg=dict()):
-   mne=check_version(mne)
-   jumeg=check_version(jumeg)
-   mne.update(jumeg)
-   return mne
-   
-def merge_dicts(mne=dict(),jumeg=dict()):
+#def merge_dicts(mne=dict(),jumeg=dict()):
     """
     function to merge two dicts with one priorised
     
@@ -224,7 +218,7 @@ def merge_dicts(mne=dict(),jumeg=dict()):
     -------
     mne : merged dict
     """
-    no_merge=compare_versions(mne,jumeg)
+    """no_merge=compare_versions(mne,jumeg)
     for key in jumeg.keys():
        if not key in mne.keys():
           mne[key]=jumeg.get(key)
@@ -237,9 +231,21 @@ def merge_dicts(mne=dict(),jumeg=dict()):
              else:
                 if not elem in no_merge.values() and not elem in mne.get(key) and not elem.startswith("mne"):
                    mne.get(key).append(elem)
-    return mne
+    return mne"""
 
-def merge_dicts3(mne=dict(),jumeg=dict()):
+def merge_dicts(mne=dict(),jumeg=dict()):
+    """
+    function to merge two dicts with one priorised
+    
+    Parameters
+    ----------
+    mne : dict with data from mne env file
+    jumeg : preferred dict with data from jumeg env file
+    
+    Returns
+    -------
+    jumeg : updated jumeg dict
+    """
     no_merge=compare_versions(mne,jumeg)
     for key in mne.keys():
         if not key in jumeg.keys():
@@ -247,7 +253,7 @@ def merge_dicts3(mne=dict(),jumeg=dict()):
         elif type(mne.get(key))==list and type(jumeg.get(key))==list:
             jumeg[key]=merge_lists(mne.get(key),jumeg.get(key),no_merge)
         elif type(mne.get(key))==dict and type(jumeg.get(key))==dict:
-            jumeg[key]=merge_dicts3(mne.get(key),jumeg.get(key))
+            jumeg[key]=merge_dicts(mne.get(key),jumeg.get(key))
         elif type(jumeg.get(key))==list:
            jumeg.get(key).append(mne.get(key))
     return jumeg
@@ -270,7 +276,7 @@ def merge_lists(mne=list(),jumeg=list(),no_merge=dict()):
        if type(elem)==dict:
           for item in jumeg:
              if type(item)==dict:
-                merge_dicts3(elem,item)
+                merge_dicts(elem,item)
        elif not elem in no_merge.values() and not elem in no_merge.keys() and not elem in jumeg:
           jumeg.append(elem)
     return jumeg
@@ -435,7 +441,9 @@ def structure(data=dict):
       length=length-1
       akt2=akt[length]
    akt[len(akt)-1]=akt[length]
-   akt[length]=saved
+   x=akt.index("pip")
+   akt[len(akt)-2]=akt[x]
+   akt[x]=saved
    return tmp
    
 def run():
@@ -444,7 +452,7 @@ def run():
    mne = load_mne(opt.fmne)
    jumeg = load_jumeg(opt.fjumeg,opt.cuda)
    jumeg["name"] = opt.name
-   data = merge_dicts3(mne,jumeg)
+   data = merge_dicts(mne,jumeg)
    data = sort_data(opt.sorted,data)
    data = structure(data)
    show(opt.show,data)
@@ -459,7 +467,7 @@ def run_test():
    #logger.info(check_version(mne))
    #logger.info(check_version(jumeg))
    logger.info(compare_versions(mne,jumeg))
-   #logger.info(merge_dicts3(mne,jumeg))
+   #logger.info(merge_dicts(mne,jumeg))
    
 def check_envs(name):
    """
