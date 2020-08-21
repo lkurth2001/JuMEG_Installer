@@ -38,7 +38,6 @@ def check_conda():
       logger.error("You need to hav anaconda installed!")
       sys.exit(0)
 
-
 def get_args(argv,parser=None,defaults=None,version=None):
    """
    function to parse the given parameters from the shell
