@@ -425,22 +425,15 @@ def structure(data=dict):
    -------
    tmp : sorted dict
    """
-   tmp=dict()
-   tmp["name"]=data.get("name")
-   tmp["channels"]=data.get("channels")
-   tmp["dependencies"]=data.get("dependencies")
-   akt=tmp.get("dependencies")
-   length=len(akt)-1
-   saved=akt[length]
-   akt2=akt[length]
-   while not type(akt2)==dict:
-      length=length-1
-      akt2=akt[length]
-   akt[len(akt)-1]=akt[length]
-   x=akt.index("pip")
-   akt[len(akt)-2]=akt[x]
-   akt[x]=saved
-   return tmp
+   akt = data.get("dependencies")
+   counter=0
+   while type(akt[counter])!=dict:
+       counter=counter+1
+   tmp=akt[len(akt)-1]
+   akt[len(akt)-1]=akt[counter]
+   akt[counter]=tmp
+   data["dependencies"]=akt
+   return data
    
 def run():
    check_conda()
