@@ -5,7 +5,6 @@ Created on Thu Jun  4 07:58:13 2020
 
 @author: lkurth
 """
-
 import subprocess
 import sys,os,argparse,glob
 import logging
@@ -203,34 +202,6 @@ def compare_versions(mne=dict(),jumeg=dict()):
        mne.pop(key)
     return mne
 
-def merge_dicts2(mne=dict(),jumeg=dict()):
-    """
-    function to merge two dicts with one priorised
-    
-    Parameters
-    ----------
-    mne : dict with mne parameters
-    jumeg : dict with jumeg parameters
-    
-    Returns
-    -------
-    mne : merged dict
-    """
-    no_merge=compare_versions(mne,jumeg)
-    for key in jumeg.keys():
-       if not key in mne.keys():
-          mne[key]=jumeg.get(key)
-       elif type(jumeg.get(key))==list:
-          for elem in jumeg.get(key):
-             if type(elem)==dict:
-                for key2 in elem.keys():
-                   index=find_dict_in_list(mne.get(key), key2)
-                   mne.get(key)[index]=merge_dicts(mne.get(key)[index],elem)
-             else:
-                if not elem in no_merge.values() and not elem in mne.get(key) and not elem.startswith("mne"):
-                   mne.get(key).append(elem)
-    return mne
-
 def merge_dicts(mne=dict(),jumeg=dict()):
     """
     function to merge two dicts with one priorised
@@ -315,7 +286,6 @@ def load_mne(fmne):
       fname = fmne
    else:
       fname=_load_env_file("mne")
-   
    return _file_to_dict(fname)
 
 def save_env(name,env=dict()):
@@ -487,12 +457,3 @@ if __name__=="__main__":
    #-> check dict key for pip 
    #-> save merged dict in new file with env-name => opt.name +.yml
    # - -> sort keys
-   #---
-   # -> install with conda
-   # - -> if opt.install ...
-   # - - -> subprocess.run() ...
-
-   # ToDo
-   # more infos use logging no print
-   # doc strings for def()
-
