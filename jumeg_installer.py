@@ -62,6 +62,7 @@ def get_args(argv,parser=None,defaults=None,version=None):
    h_sorted="Sorts the new environment file"
    h_show="Shows the new environment file in the shell"
    h_install="Installs a new conda environment"
+   h_overwrite="Overwrites an existing environment with the same name"
    if not parser:
       parser = argparse.ArgumentParser(description=description)
    else:
@@ -76,7 +77,8 @@ def get_args(argv,parser=None,defaults=None,version=None):
          "save":False,
          "sorted":False,
          "show":False,
-         "install":False
+         "install":False,
+         "overwrite":False
          }
    if len(argv)<2:
        parser.print_help()
@@ -90,6 +92,7 @@ def get_args(argv,parser=None,defaults=None,version=None):
    parser.add_argument("--sorted",action="store_true",help=h_sorted,default=defaults.get("sorted"))
    parser.add_argument("--show",action="store_true",help=h_show,default=defaults.get("show"))
    parser.add_argument("--install",action="store_true",help=h_install,default=defaults.get("install"))
+   parser.add_argument("--overwrite",action="store_true",help=h_overwrite,default=defaults.get("overwrite"))
    opt=parser.parse_args()
    return opt
 
@@ -309,6 +312,7 @@ def delete_env_file(save,name):
    Parameters
    ----------
    save : if save is true the file is saved else it is deleted
+   name : name of the new environment
    """
    if not save:
       fname=name+".yml"
@@ -349,23 +353,22 @@ def sort_data(bSorted,env):
    else:
        return env
 
-def install(bInstall,name):
+def install(bInstall,name,overwrite):
     """
     function to install the new conda environment
     
     Parameters
     ----------
-    opt : list of given parameters
+    bInstall : boolean value for installing the environment
+    name : name of the environment
+    overwrite : bool if an existing environment should be overwritten
     """
     if bInstall:
         fname=name + ".yml"
-        if check_envs(name):
-            subprocess.run(["conda","deactivate"],stdout=DEVNULL)
-            subprocess.run(["conda","env","update","-n",name,"--file",fname])
-            subprocess.run(["conda","activate",name],stdout=DEVNULL)
+        if overwrite:
+           subprocess.run(["conda","env","create","-f",fname,"--force"])
         else:
-            subprocess.run(["conda","env","create","-f",fname])
-            subprocess.run(["conda","activate",name],stdout=DEVNULL)
+           subprocess.run(["conda","env","create","-f",fname])
 
 def dict2str(d,intend=2):
     """
@@ -416,7 +419,7 @@ def run():
    data = structure(data)
    show(opt.show,data)
    save_env(opt.name,data)
-   install(opt.install,opt.name)
+   install(opt.install,opt.name,opt.overwrite)
    delete_env_file(opt.save,opt.name)
    
 def run_test():
