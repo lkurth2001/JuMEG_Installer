@@ -23,6 +23,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 DEVNULL=subprocess.DEVNULL
 
+# websites where the environment files can be downloaded
 remote_name={
    "jumeg_cuda":"https://gist.githubusercontent.com/pravsripad/7bb8f696999985b442d9aca8ade19f19/raw/5f88b0493a4037b880d05e95e52f1c9ce9463af8/jumeg_cuda.yml",
    "jumeg":"https://gist.githubusercontent.com/pravsripad/0361ffee14913487eb7b7ef43c9367fe/raw/8299c6bff6386a037af046cab5483af45c037c4f/jumeg.yml",
@@ -34,7 +35,7 @@ def check_conda():
    function which checks if anaconda is installed, if not the programme stops and sends an error
    """
    if subprocess.run(["which","conda"],stdout=DEVNULL).returncode==1:
-      logger.error("You need to hav anaconda installed!")
+      logger.error("You need to have anaconda installed!")
       sys.exit(0)
 
 def get_args(argv,parser=None,defaults=None,version=None):
@@ -193,7 +194,7 @@ def compare_versions(mne=dict(),jumeg=dict()):
     
     Returns
     -------
-    jumeg : updated dict
+    mne : updated dict
     """
     mne=check_version(mne)
     jumeg=check_version(jumeg)
@@ -283,7 +284,7 @@ def load_mne(fmne):
    
    Returns
    -------
-   dict_mne : dict filled with values from mne environment file
+   _file_to_dict(fname) : dict filled with values from mne environment file
    """
    if fmne:
       fname = fmne
@@ -343,7 +344,8 @@ def sort_data(bSorted,env):
    
    Returns
    -------
-   env : sorted dict 
+   result : sorted dict or
+   env : nothing changed
    """
    if bSorted and env:
       result=dict()
@@ -381,7 +383,7 @@ def dict2str(d,intend=2):
      
     Returns
     -------
-    dict as string
+    dict d as string
     """
     pp = pprint.PrettyPrinter(indent=intend)
     return ''.join(map(str,pp.pformat(d)))     
@@ -396,7 +398,7 @@ def structure(data=dict):
    
    Returns
    -------
-   tmp : sorted dict
+   data : sorted dict
    """
    akt = data.get("dependencies")
    counter=0
